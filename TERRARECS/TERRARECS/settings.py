@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'TERRARECS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'terrarecs_test',
+        'NAME': 'terrarecs',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '127.0.0.1',

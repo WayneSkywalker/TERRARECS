@@ -3,35 +3,44 @@ from django.db import models
 class Province(models.Model):
     province_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30, unique = True)
-    en = models.CharField(max_length = 30, unique = True)
+    en = models.CharField(max_length = 30, blank = True)
 
     class Meta:
         db_table = 'province'
 
+    def __str__(self):
+        return self.th
+
 class Amphur(models.Model):
     amphur_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30)
-    en = models.CharField(max_length = 30)
+    en = models.CharField(max_length = 30, blank = True)
 
     province = models.ForeignKey(Province, related_name = 'province', on_delete = models.CASCADE)
 
     class Meta:
         db_table = 'amphur'
 
+    def __str__(self):
+        return self.th
+
 class District(models.Model):
     district_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30)
-    en = models.CharField(max_length = 30)
+    en = models.CharField(max_length = 30, blank = True)
 
     amphur = models.ForeignKey(Amphur, related_name = 'amphur', on_delete = models.CASCADE)
 
     class Meta:
         db_table = 'district'
+    
+    def __str__(self):
+        return self.th
 
 class Page(models.Model):
     page_id = models.IntegerField(primary_key = True, unique = True)
-    title_th = models.CharField()
-    title_en = models.CharField()
+    title_th = models.CharField(max_length = 3000)
+    title_en = models.CharField(max_length = 3000, blank = True)
     lat = models.FloatField()
     lng = models.FloatField()
     # status = models.PositiveIntegerField()
@@ -97,10 +106,10 @@ class Page(models.Model):
     landarea_total_sqw = models.FloatField()
     area_size_sqm = models.FloatField()
     
-    province = models.ForeignKey(Province, related_name = 'address_province', on_delete = models.CASCADE)
-    amphur = models.ForeignKey(Amphur, related_name = 'address_amphur', on_delete = models.CASCADE)
     district = models.ForeignKey(District, related_name = 'address_district', on_delete = models.CASCADE)
-    
+    amphur = models.ForeignKey(Amphur, related_name = 'address_amphur', on_delete = models.CASCADE)
+    province = models.ForeignKey(Province, related_name = 'address_province', on_delete = models.CASCADE)
+
     # district_id
     # amphur_id
     # province_id
@@ -121,15 +130,21 @@ class Page(models.Model):
     class Meta:
         db_table = 'page'
 
+    def __str__(self):
+        return self.page_id
+
 class Place(models.Model):
-    name_th = models.CharField()
-    address_th = models.CharField()
+    name_th = models.CharField(max_length = 350)
+    address_th = models.CharField(max_length = 500)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    poi_type = models.CharField()
+    poi_type = models.CharField(max_length = 300)
 
     class Meta:
         db_table = 'place'
+    
+    def __str__(self):
+        return self.name_th
 
 class Transaction(models.Model):
     userID = models.CharField(max_length = 200)
@@ -138,6 +153,9 @@ class Transaction(models.Model):
 
     class Meta:
         db_table = 'transaction'
+
+    def __str__(self):
+        return '%s viewed %d --> event_strength %f' % (self.userID, self.page.page_id, self.event_strength)
 
 # class Evaluation_transaction(models.Model):
 #     # fields
