@@ -46,23 +46,23 @@ class CBRecommender:
     def get_model_name(self):
         return self.MODEL_NAME
 
-    def prepare_page_feature(self):
+    def prepare_page_features(self):
         df_pages = self.df_pages
 
         df_house_type_ohe = pd.get_dummies(df_pages.house_type, prefix='house_type')
-        df_pages['house_type_detached_house'] = df_house_type_ohe['house_type_6.0']
-        df_pages['house_type_condominium'] = df_house_type_ohe['house_type_7.0']
-        df_pages['house_type_land'] = df_house_type_ohe['house_type_8.0']
-        df_pages['house_type_townhouse'] = df_house_type_ohe['house_type_9.0']
-        df_pages['house_type_shophouse'] = df_house_type_ohe['house_type_10.0']
-        df_pages['house_type_other'] = df_house_type_ohe['house_type_11.0']
-        df_pages['house_type_semi_detached_house'] = df_house_type_ohe['house_type_197.0']
-        df_pages['house_type_home_office'] = df_house_type_ohe['house_type_198.0']
-        df_pages['house_type_factory'] = df_house_type_ohe['house_type_206.0']
-        df_pages['house_type_warehouse'] = df_house_type_ohe['house_type_207.0']
-        df_pages['house_type_office'] = df_house_type_ohe['house_type_208.0']
-        df_pages['house_type_apartment'] = df_house_type_ohe['house_type_209.0']
-        df_pages['house_type_hotel'] = df_house_type_ohe['house_type_210.0']
+        df_pages['house_type_detached_house'] = df_house_type_ohe['house_type_6']
+        df_pages['house_type_condominium'] = df_house_type_ohe['house_type_7']
+        df_pages['house_type_land'] = df_house_type_ohe['house_type_8']
+        df_pages['house_type_townhouse'] = df_house_type_ohe['house_type_9']
+        df_pages['house_type_shophouse'] = df_house_type_ohe['house_type_10']
+        df_pages['house_type_other'] = df_house_type_ohe['house_type_11']
+        df_pages['house_type_semi_detached_house'] = df_house_type_ohe['house_type_197']
+        df_pages['house_type_home_office'] = df_house_type_ohe['house_type_198']
+        df_pages['house_type_factory'] = df_house_type_ohe['house_type_206']
+        df_pages['house_type_warehouse'] = df_house_type_ohe['house_type_207']
+        df_pages['house_type_office'] = df_house_type_ohe['house_type_208']
+        df_pages['house_type_apartment'] = df_house_type_ohe['house_type_209']
+        df_pages['house_type_hotel'] = df_house_type_ohe['house_type_210']
         del df_house_type_ohe
         
         post_type_sale = []
@@ -90,45 +90,45 @@ class CBRecommender:
         df_pages['post_type_rent'] = post_type_rent
         del post_type_sale, post_type_sale_down, post_type_rent
         
-        df_pages = df_pages.replace({'room_type' : { 49 : 48, 50 : 48, 51 : 48, 52 : 48, 53 : 48}}, inplace = True)
-        df_room_type_ohe = pd.get_dummies(df_pages.room_type, prefix='room_type')
-        df_pages['room_type_penhouse'] = df_room_type_ohe['room_type_41.0']
-        df_pages['room_type_duplex'] = df_room_type_ohe['room_type_42.0']
-        df_pages['room_type_studio'] = df_room_type_ohe['room_type_43.0']
-        df_pages['room_type_1'] = df_room_type_ohe['room_type_44.0']
-        df_pages['room_type_2'] = df_room_type_ohe['room_type_45.0']
-        df_pages['room_type_3'] = df_room_type_ohe['room_type_46.0']
-        df_pages['room_type_4'] = df_room_type_ohe['room_type_47.0']
-        df_pages['room_type_5+'] = df_room_type_ohe['room_type_48.0']
+        df_pages.replace({'room_type' : { 49 : 48, 50 : 48, 51 : 48, 52 : 48, 53 : 48}}, inplace = True)
+        df_room_type_ohe = pd.get_dummies(df_pages.room_type, prefix = 'room_type')
+        df_pages['room_type_penhouse'] = df_room_type_ohe['room_type_41']
+        df_pages['room_type_duplex'] = df_room_type_ohe['room_type_42']
+        df_pages['room_type_studio'] = df_room_type_ohe['room_type_43']
+        df_pages['room_type_1'] = df_room_type_ohe['room_type_44']
+        df_pages['room_type_2'] = df_room_type_ohe['room_type_45']
+        df_pages['room_type_3'] = df_room_type_ohe['room_type_46']
+        df_pages['room_type_4'] = df_room_type_ohe['room_type_47']
+        df_pages['room_type_5+'] = df_room_type_ohe['room_type_48']
         del df_room_type_ohe
         
         # ohe with area id
         df_area_ohe = pd.get_dummies(df_pages.area_id, prefix = 'area_id')
-        df_pages['area_id_1'] = df_area_ohe['area_id_1.0']
-        df_pages['area_id_2'] = df_area_ohe['area_id_2.0']
-        df_pages['area_id_3'] = df_area_ohe['area_id_3.0']
-        df_pages['area_id_4'] = df_area_ohe['area_id_4.0']
-        df_pages['area_id_5'] = df_area_ohe['area_id_5.0']
-        df_pages['area_id_6'] = df_area_ohe['area_id_6.0']
-        df_pages['area_id_7'] = df_area_ohe['area_id_7.0']
-        df_pages['area_id_8'] = df_area_ohe['area_id_8.0']
-        df_pages['area_id_9'] = df_area_ohe['area_id_9.0']
-        df_pages['area_id_10'] = df_area_ohe['area_id_10.0']
-        df_pages['area_id_11'] = df_area_ohe['area_id_11.0']
-        df_pages['area_id_12'] = df_area_ohe['area_id_12.0']
-        df_pages['area_id_13'] = df_area_ohe['area_id_13.0']
-        df_pages['area_id_14'] = df_area_ohe['area_id_14.0']
-        df_pages['area_id_15'] = df_area_ohe['area_id_15.0']
-        df_pages['area_id_16'] = df_area_ohe['area_id_16.0']
-        df_pages['area_id_17'] = df_area_ohe['area_id_17.0']
-        df_pages['area_id_18'] = df_area_ohe['area_id_18.0']
-        df_pages['area_id_19'] = df_area_ohe['area_id_19.0']
-        df_pages['area_id_20'] = df_area_ohe['area_id_20.0']
-        df_pages['area_id_21'] = df_area_ohe['area_id_21.0']
-        df_pages['area_id_22'] = df_area_ohe['area_id_22.0']
-        df_pages['area_id_23'] = df_area_ohe['area_id_23.0']
-        df_pages['area_id_24'] = df_area_ohe['area_id_24.0']
-        df_pages['area_id_25'] = df_area_ohe['area_id_25.0']
+        df_pages['area_id_1'] = df_area_ohe['area_id_1']
+        df_pages['area_id_2'] = df_area_ohe['area_id_2']
+        df_pages['area_id_3'] = df_area_ohe['area_id_3']
+        df_pages['area_id_4'] = df_area_ohe['area_id_4']
+        df_pages['area_id_5'] = df_area_ohe['area_id_5']
+        df_pages['area_id_6'] = df_area_ohe['area_id_6']
+        df_pages['area_id_7'] = df_area_ohe['area_id_7']
+        df_pages['area_id_8'] = df_area_ohe['area_id_8']
+        df_pages['area_id_9'] = df_area_ohe['area_id_9']
+        df_pages['area_id_10'] = df_area_ohe['area_id_10']
+        df_pages['area_id_11'] = df_area_ohe['area_id_11']
+        df_pages['area_id_12'] = df_area_ohe['area_id_12']
+        df_pages['area_id_13'] = df_area_ohe['area_id_13']
+        df_pages['area_id_14'] = df_area_ohe['area_id_14']
+        df_pages['area_id_15'] = df_area_ohe['area_id_15']
+        df_pages['area_id_16'] = df_area_ohe['area_id_16']
+        df_pages['area_id_17'] = df_area_ohe['area_id_17']
+        df_pages['area_id_18'] = df_area_ohe['area_id_18']
+        df_pages['area_id_19'] = df_area_ohe['area_id_19']
+        df_pages['area_id_20'] = df_area_ohe['area_id_20']
+        df_pages['area_id_21'] = df_area_ohe['area_id_21']
+        df_pages['area_id_22'] = df_area_ohe['area_id_22']
+        df_pages['area_id_23'] = df_area_ohe['area_id_23']
+        df_pages['area_id_24'] = df_area_ohe['area_id_24']
+        df_pages['area_id_25'] = df_area_ohe['area_id_25']
         del df_area_ohe
         
         # calculate distances from supermarket, department store, and education
@@ -164,9 +164,9 @@ class CBRecommender:
         # df_pages['distances_department_store'] = distances_department_store
         # df_pages['distances_education'] = distances_education
         
-        columns_unused = ['title_th','title_en','area_id','post_type','status','district_id','amphur_id','province_id','room_type','house_type']
-        # columns_unused = ['title_th','title_en','area_id','post_type','status','room_type','house_type']
-        df_features = df_pages.drop(columns = columns_unused).set_index('id')
+        columns_unused = ['title_th','title_en','area_id','post_type','district_id','amphur_id','province_id','room_type','house_type']
+        # columns_unused = ['title_th','title_en','area_id','post_type','room_type','house_type']
+        df_features = df_pages.drop(columns = columns_unused).set_index('page_id')
         
         df_features = normalize_data(df_features) # normalize data
         
@@ -188,7 +188,7 @@ class CBRecommender:
             if query_page['post_type_sale'] == 1:
                 query_page = query_page.drop(labels = ['rent_price'])
             elif query_page['post_type_rent'] == 1:
-                query_page = query_page.drop(labels = ['sell_price'])
+                query_page = query_page.drop(labels = ['sale_price'])
         elif query_page['post_type_sale_down'] == 1:
             query_page = query_page.drop(labels = ['rent_price'])
         
@@ -221,16 +221,16 @@ class CBRecommender:
         knn_distances_list = []
         for i in range(0, len(distances.flatten())):
             if i != 0:
-                print('{0}: {1}, with distance of {2}:'.format(i, df_features.index[indices.flatten()[i]], distances.flatten()[i]))
+                # print('{0}: {1}, with distance of {2}:'.format(i, df_features.index[indices.flatten()[i]], distances.flatten()[i]))
                 recommendation_list.append(df_features.index[indices.flatten()[i]])
                 knn_distances_list.append(distances.flatten()[i])
                 
         temp = pd.DataFrame({'page' : recommendation_list, 'distance' : knn_distances_list}).sort_values(['page'])
         
-        df_recommendation = self.df_pages[self.df_pages.id.isin(recommendation_list)]
+        df_recommendation = self.df_pages[self.df_pages.page_id.isin(recommendation_list)]
         df_recommendation['distance'] = temp['distance'].tolist()
         df_recommendation = df_recommendation.sort_values(['distance'])
-        df_recommendation = df_recommendation[df_recommendation.id != page_id].reset_index(drop = True)
+        df_recommendation = df_recommendation[df_recommendation.page_id != page_id].reset_index(drop = True)
         
         del temp
         

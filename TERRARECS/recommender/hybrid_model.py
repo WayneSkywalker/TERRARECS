@@ -18,69 +18,82 @@ class HybridRecommender:
     def get_model_name(self):
         return self.MODEL_NAME
     
-    def recommend(self, page_id, k = 10):
+    def recommend(self, page_id, k = 10, topn = None):
         df_cb_recs = self.cb_recs_model.recommend(page_id, k)
         df_cf_recs = self.cf_recs_model.recommend(page_id)
         
-        df_hybrid_recs = df_cb_recs.merge(df_cf_recs, how = 'outer', left_on = 'id', right_on = 'id').fillna(0)
+        df_hybrid_recs = df_cb_recs.merge(df_cf_recs, how = 'outer', left_on = 'page_id', right_on = 'page_id').fillna(0)
         
         # df_hybrid_recs['score'] = ((df_hybrid_recs['distance'] / df_cb_recs['distance'].mean()) * self.cb_ensemble_weight) + ((df_hybrid_recs['corr'] / df_cf_recs['corr'].mean()) * self.cf_ensemble_weight)
         df_hybrid_recs['score'] = (df_hybrid_recs['distance'] * self.cb_ensemble_weight) + (df_hybrid_recs['corr'] * self.cf_ensemble_weight)
         
         # df_hybrid_recs = df_hybrid_recs.sort_values('score', ascending = False).head(k)
         
-        df_hybrid_recs = df_hybrid_recs.sort_values('id')
-        df_hybrid_recs_list = df_hybrid_recs.id.tolist()
+        df_hybrid_recs = df_hybrid_recs.sort_values('page_id')
+        df_hybrid_recs_list = df_hybrid_recs.page_id.tolist()
         df_hybrid_recs_score_list = df_hybrid_recs.score.tolist()
         del df_hybrid_recs
         
-        df_recommendation = self.df_pages[self.df_pages.id.isin(df_hybrid_recs_list)]
+        df_recommendation = self.df_pages[self.df_pages.page_id.isin(df_hybrid_recs_list)]
         df_recommendation['score'] = df_hybrid_recs_score_list
         del df_hybrid_recs_list, df_hybrid_recs_score_list
-        df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True).head(k)
+
+        if topn is not None:
+            df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True).head(k)
+        else:
+            df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True)
         
         # return df_hybrid_recs
         return df_recommendation
     
-    def recommend_with_top_3cb(self, page_id, k = 10):
+    def recommend_with_top_3cb(self, page_id, k = 10, topn = None):
         df_cb_recs = self.cb_recs_model.recommend(page_id, k)
         df_cf_recs = self.cf_recs_model.recommend(page_id)
         
         df_recommendation = df_cb_recs.head(3)
         df_recommendation = df_recommendation.rename(columns = {"distance":"score"})
         
-        df_cb_recs = df_cb_recs[~df_cb_recs['id'].isin(df_recommendation['id'].tolist())]
+        df_cb_recs = df_cb_recs[~df_cb_recs['page_id'].isin(df_recommendation['page_id'].tolist())]
         
-        df_hybrid_recs = df_cb_recs.merge(df_cf_recs, how = 'outer', left_on = 'id', right_on = 'id').fillna(0)
+        df_hybrid_recs = df_cb_recs.merge(df_cf_recs, how = 'outer', left_on = 'page_id', right_on = 'page_id').fillna(0)
         
         # df_hybrid_recs['score'] = ((df_hybrid_recs['distance'] / df_cb_recs['distance'].mean()) * self.cb_ensemble_weight) + ((df_hybrid_recs['corr'] / df_cf_recs['corr'].mean()) * self.cf_ensemble_weight)
         df_hybrid_recs['score'] = (df_hybrid_recs['distance'] * self.cb_ensemble_weight) + (df_hybrid_recs['corr'] * self.cf_ensemble_weight)
         
         # df_hybrid_recs = df_hybrid_recs.sort_values('score', ascending = False).head(k)
         
-        df_hybrid_recs = df_hybrid_recs.sort_values('id')
-        df_hybrid_recs_list = df_hybrid_recs.id.tolist()
+        df_hybrid_recs = df_hybrid_recs.sort_values('page_id')
+        df_hybrid_recs_list = df_hybrid_recs.page_id.tolist()
         df_hybrid_recs_score_list = df_hybrid_recs.score.tolist()
         del df_hybrid_recs
         
-        temp = self.df_pages[self.df_pages.id.isin(df_hybrid_recs_list)]
+        temp = self.df_pages[self.df_pages.page_id.isin(df_hybrid_recs_list)]
         temp['score'] = df_hybrid_recs_score_list
         temp = temp.sort_values('score', ascending = False).reset_index(drop = True)
         del df_hybrid_recs_list, df_hybrid_recs_score_list
         
-        df_recommendation = df_recommendation.append(temp, ignore_index = True).head(k)
+        if topn is not None:
+            df_recommendation = df_recommendation.append(temp, ignore_index = True).head(k)
+        else:
+            df_recommendation = df_recommendation.append(temp, ignore_index = True)
+
         del temp
         
         return df_recommendation
     
-    def recommend_without_weights(self, page_id, k = 10, n_cb = None, n_cf = None):
-        
-        if (n_cb is None) or (n_cf is None):
-            n_cb = int(round(k / 2))
-            n_cf = int(round(k / 2))
+    def recommend_without_weights(self, page_id, k = 10, n_cb = None, n_cf = None, topn = None):
         
         df_cb_recs = self.cb_recs_model.recommend(page_id, k)
         df_cf_recs = self.cf_recs_model.recommend(page_id)
+
+        if topn is not None:
+            if (n_cb is None) or (n_cf is None):
+                n_cb = int(round(topn / 2))
+                n_cf = int(round(topn / 2))
+        else:
+            if (n_cb is None) or (n_cf is None):
+                n_cb = int(round(k / 2))
+                n_cf = int(round(k / 2))
         
         df_cb_recs = df_cb_recs.drop(columns = ['distance']).head(n_cb)
         df_cf_recs = df_cf_recs.drop(columns = ['corr']).head(n_cf)

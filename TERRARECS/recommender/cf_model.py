@@ -17,17 +17,17 @@ class CFRecommender:
     
     def prepare_txn_features(self):
         df_txns = self.df_txns
+        df_pages = self.df_pages
         
-        df_pages_renamed = self.df_pages.rename(columns = {"id":"page"})
-        df_txns = df_txns[df_txns.page.isin(df_pages_renamed.page.to_list())]
+        df_txns = df_txns[df_txns.page_id.isin(df_pages.page_id.to_list())]
         
-        combine_page_txns = pd.merge(df_txns, df_pages_renamed, on = 'page')
+        combine_page_txns = pd.merge(df_txns, df_pages, on = 'page_id')
     
-        df_page_viewed_count = combine_page_txns.groupby(by = ['page'])['event_strength'].count().reset_index().rename(columns = {'event_strength': 'total_views_count'})
+        df_page_viewed_count = combine_page_txns.groupby(by = ['page_id'])['event_strength'].count().reset_index().rename(columns = {'event_strength': 'total_views_count'})
         
-        df_viewed_with_page_viewed_count = combine_page_txns.merge(df_page_viewed_count, how = 'left', left_on = 'page', right_on = 'page')
+        df_viewed_with_page_viewed_count = combine_page_txns.merge(df_page_viewed_count, how = 'left', left_on = 'page_id', right_on = 'page_id')
         
-        df_features = df_viewed_with_page_viewed_count.pivot_table(index = 'userID', columns = 'page', values = 'event_strength').fillna(0)
+        df_features = df_viewed_with_page_viewed_count.pivot_table(index = 'userID', columns = 'page_id', values = 'event_strength').fillna(0)
         
         return df_features
     
@@ -59,8 +59,8 @@ class CFRecommender:
         
         corr_recs_list = corr_query_page[(corr_query_page >= 1)].tolist()
         
-        df_recommendation = self.df_pages[self.df_pages.id.isin(list(page_titles[(corr_query_page >= 1)]))]
+        df_recommendation = self.df_pages[self.df_pages.page_id.isin(list(page_titles[(corr_query_page >= 1)]))]
         df_recommendation['corr'] = corr_recs_list
-        df_recommendation = df_recommendation[df_recommendation.id != page_id].reset_index(drop = True)
+        df_recommendation = df_recommendation[df_recommendation.page_id != page_id].reset_index(drop = True)
         
         return df_recommendation

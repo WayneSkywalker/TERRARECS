@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    {% load staticfiles %}
-    <link rel="stylesheet" href=""/>
-</head>
-<body>
-    <h1>HELLO, TERRA.</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center mb-3">TERRABKK Recommender System</h1>
+    <div class="container text-center">
+        <a class="btn btn-primary" href="upload-address-data" role="button">Upload address data</a>
+        <a class="btn btn-primary" href="upload-pages-data" role="button">Upload page data</a>
+        <a class="btn btn-primary" href="upload-txns-data" role="button">Upload transaction data</a>
+        <a class="btn btn-primary" href="upload-places-data" role="button">Upload place data</a>
+    </div>
+{% endblock %}

@@ -135,10 +135,13 @@ class Page(models.Model):
 
 class Place(models.Model):
     name_th = models.CharField(max_length = 350)
-    address_th = models.CharField(max_length = 500)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    poi_type = models.CharField(max_length = 300)
+    poi_type = models.CharField(max_length = 300) # ['Supermarket/ Convenience Store', 'school, university, education places', 'Department Store']
+
+    district = models.ForeignKey(District, related_name = 'place_address_district', on_delete = models.CASCADE)
+    amphur = models.ForeignKey(Amphur, related_name = 'place_address_amphur', on_delete = models.CASCADE)
+    province = models.ForeignKey(Province, related_name = 'place_address_province', on_delete = models.CASCADE)
 
     class Meta:
         db_table = 'place'
@@ -157,8 +160,26 @@ class Transaction(models.Model):
     def __str__(self):
         return '%s viewed %d --> event_strength %f' % (self.userID, self.page.page_id, self.event_strength)
 
-# class Evaluation_transaction(models.Model):
-#     # fields
+class Setting(models.Model):
+    setting_name = models.CharField(max_length = 30, unique = True)
+    
+    RECS_TYPE_CHOICES = (
+        (1,'NORMAL RECOMMENDER'),
+        (2,'RECOMMENDER WITH TOP 3 CONTENT - BASED'),
+        (3,'RECOMMENDER WITHOUT WEIGHTS'),
+    )
+    recs_type = models.PositiveSmallIntegerField(choices = RECS_TYPE_CHOICES, default = 1)
 
-#     class Meta:
-#         db_table = 'evaluation_transaction'
+    cb_ensemble_weight = models.PositiveIntegerField(default = 1)
+    cf_ensemble_weight = models.PositiveIntegerField(default = 1)
+    k = models.PositiveSmallIntegerField(null = True, blank = True)
+    topn = models.PositiveSmallIntegerField(null = True, blank = True)
+    n_cb = models.PositiveSmallIntegerField(null = True, blank = True)
+    n_cf = models.PositiveSmallIntegerField(null = True, blank = True)
+
+    class Meta:
+        db_table = 'setting'
+        unique_together = [['recs_type','cb_ensemble_weight','cf_ensemble_weight','k','topn','n_cb','n_cf']]
+
+    def __str__(self):
+        return self.setting_name

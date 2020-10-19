@@ -15,7 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from recommender.views import index, detail, recommend_default, recommend, upload_address, upload_pages, upload_txns, upload_places
 
 urlpatterns = [
+    path('', index, name = 'index'),
     path('admin/', admin.site.urls),
+    path('<int:page_id>', detail, name = 'detail'),
+    path('recommend_default/<int:page_id>', recommend_default, name = 'recommend_default'),
+    path('recommend/<int:page_id>/<str:setting_name>', recommend, name = 'recommend'),
+    path('upload-address-data/', upload_address, name = 'upload_address'),
+    path('upload-pages-data/', upload_pages, name = 'upload_pages'),
+    path('upload-txns-data/', upload_txns, name = 'upload_txns'),
+    path('upload-places-data/', upload_places, name = 'upload_places'),
 ]
