@@ -106,6 +106,11 @@ class Page(models.Model):
     landarea_total_sqw = models.FloatField()
     area_size_sqm = models.FloatField()
     
+    distances_supermarket = models.FloatField()
+    distances_department_store = models.FloatField()
+    distances_education = models.FloatField()
+    distances_transit = models.FloatField()
+
     district = models.ForeignKey(District, related_name = 'address_district', on_delete = models.CASCADE)
     amphur = models.ForeignKey(Amphur, related_name = 'address_amphur', on_delete = models.CASCADE)
     province = models.ForeignKey(Province, related_name = 'address_province', on_delete = models.CASCADE)
@@ -145,6 +150,18 @@ class Place(models.Model):
 
     class Meta:
         db_table = 'place'
+    
+    def __str__(self):
+        return self.name_th
+
+class Transit(models.Model):
+    name_th = models.CharField(max_length = 100)
+    name_en = models.CharField(max_length = 100, blank = True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+
+    class Meta:
+        db_table = 'transit'
     
     def __str__(self):
         return self.name_th

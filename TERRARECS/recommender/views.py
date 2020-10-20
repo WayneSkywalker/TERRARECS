@@ -1,12 +1,31 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # from django.contrib.auth.decorators import permission_required
-from .models import Province, Amphur, District, Page, Transaction, Place, Setting
+from .models import Province, Amphur, District, Page, Transaction, Place, Setting, Transit
+from .forms import SettingForm
 
 from .cb_model import CBRecommender
 from .cf_model import CFRecommender
 from .hybrid_model import HybridRecommender
 
 import pandas as pd
+from math import sin, cos, sqrt, atan2, radians
+
+def get_distance(x1,y1,x2,y2):
+    # approximate radius of the earth in km.
+    R = 6373.0
+    latitude_1 = radians(x1)
+    longitude_1 = radians(y1)
+    latitude_2 = radians(x2)
+    longitude_2 = radians(y2)
+
+    d_longitude = longitude_2 - longitude_1
+    d_latitude = latitude_2 - latitude_1
+
+    a = sin(d_latitude / 2)**2 + cos(latitude_1) * cos(latitude_2) * sin(d_longitude / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = R * c
+
+    return distance
 
 def index(request):
     return render(request, 'index.html')
@@ -19,10 +38,10 @@ def detail(request, page_id):
     return render(request, 'detail.html', {'page': page})
 
 def upload_address(request):
-    template = 'upload_address.html'
+    template = 'upload_pages/upload_address.html'
 
     prompt = {
-        'order': 'Order of the CSV should be \'district_id\', \district_th\', \'amphur_id\', \'amphur_th\' \
+        'order': 'Order of the CSV should be \'district_id\', \'district_th\', \'amphur_id\', \'amphur_th\' \
             , \'province_id\', and \'province_th\'.'
     }
 
@@ -61,7 +80,7 @@ def upload_address(request):
     return render(request, template, context)
 
 def upload_pages(request):
-    template = 'upload_pages.html'
+    template = 'upload_pages/upload_pages.html'
 
     # prompt = {
     #     'order': 'Order of the CSV should be \'district_id\', \district_th\', \'amphur_id\', \'amphur_th\' \
@@ -84,6 +103,82 @@ def upload_pages(request):
         return render(request, template, prompt_2)
 
     df_pages = pd.read_csv(csv_file)
+    df_pages_columns = df_pages.columns.tolist()
+
+    # ['Supermarket/ Convenience Store', 'school, university, education places', 'Department Store']
+    flag_distances = 0
+    flag_supermarket = False    
+    flag_department_store = False
+    flag_education = False
+    flag_transit = False
+    distances_list = ['distances_supermarket','distances_department_store','distances_education','distances_transit']
+
+    for e in distances_list:
+        if e not in df_pages_columns:
+            flag_distances += 1
+    if flag_distances != 0:
+        df_places = pd.DataFrame(list(Place.objects.all().values()))
+        df_place_supermarket = df_places[df_places['poi_type'] == 'Supermarket/ Convenience Store']
+        df_place_department_store = df_places[df_places['poi_type'] == 'Department Store']
+        df_place_education = df_places[df_places['poi_type'] == 'school, university, education places']
+
+        if 'distances_supermarket' not in df_pages_columns:
+            flag_supermarket = True
+        if 'distances_department_store' not in df_pages_columns:
+            flag_department_store = True
+        if 'distances_education' not in df_pages_columns:
+            flag_education = True
+        if 'distances_transit' not in df_pages_columns:
+            flag_transit = True
+            df_transits = pd.DataFrame(list(Transit.objects.all().values()))
+        
+        distances_supermarket = []
+        distances_department_store = []
+        distances_education = []
+        distances_transit = []
+        for index, row in df_pages.iterrows():
+            supermarket_distance = 10000000
+            department_store_distance = 10000000
+            education_distance = 10000000
+            transit_distance = 10000
+            if flag_supermarket:
+                df_place_supermarket_temp = df_place_supermarket[df_place_supermarket.province_id == row['province_id']] 
+                for index_supermarket, row_supermarket in df_place_supermarket_temp.iterrows():
+                    d = get_distance(row['lat'], row['lng'], row_supermarket['latitude'], row_supermarket['longitude'])
+                    if d < supermarket_distance:
+                        supermarket_distance = d
+                distances_supermarket.append(supermarket_distance)
+            if flag_department_store:
+                df_place_department_store_temp = df_place_department_store[df_place_department_store.province_id == row['province_id']]
+                for index_department_store, row_department_store in df_place_department_store_temp.iterrows():
+                    d = get_distance(row['lat'], row['lng'], row_department_store['latitude'], row_department_store['longitude'])
+                    if d < department_store_distance:
+                        department_store_distance = d
+                distances_department_store.append(department_store_distance)
+            if flag_education:
+                df_place_education_temp = df_place_education[df_place_education.province_id == row['province_id']]
+                for index_education, row_education in df_place_education_temp.iterrows():
+                    d = get_distance(row['lat'], row['lng'], row_education['latitude'], row_education['longitude'])
+                    if d < education_distance:
+                        education_distance = d
+                distances_education.append(education_distance)
+            if flag_transit:
+                for index_transit, row_transit in df_transits.iterrows():
+                    d = get_distance(row['lat'], row['lng'], row_transit['latitude'], row_transit['longitude'])
+                    if d < transit_distance:
+                        transit_distance = d
+                distances_transit.append(transit_distance)
+        if flag_supermarket:
+            df_pages['distances_supermarket'] = distances_supermarket
+        if flag_department_store:
+            df_pages['distances_department_store'] = distances_department_store
+        if flag_education:        
+            df_pages['distances_education'] = distances_education
+        if flag_transit:
+            df_pages['distances_transit'] = distances_transit
+            del df_transits
+        del df_places, distances_supermarket, distances_department_store, distances_education, distances_transit, supermarket_distance, department_store_distance, education_distance, transit_distance, d
+    del distances_list, flag_distances, flag_supermarket, flag_department_store, flag_education, flag_transit
 
     for index, row in df_pages.iterrows():
         district = District.objects.get(district_id = row['district_id'])
@@ -93,22 +188,20 @@ def upload_pages(request):
         _, created = Page.objects.update_or_create(page_id = row['id'], title_th = row['title_th'], title_en = row['title_en'] \
             , lat = row['lat'], lng = row['lng'], rent_price = row['rent_price'], sale_price = row['sell_price'], area_id = row['area_id']\
             , post_type = row['post_type'], house_type = row['house_type'], landarea_total_sqw = row['landarea_total_sqw'] \
-            , area_size_sqm = row['areasize_sqm'], room_type = row['room_type'], province = province, amphur = amphur, district = district)
+            , area_size_sqm = row['areasize_sqm'], room_type = row['room_type']\
+            , distances_supermarket = row['distances_supermarket'], distances_department_store = row['distances_department_store']\
+            , distances_education = row['distances_education'], distances_transit = row['distances_transit']\
+            , province = province, amphur = amphur, district = district)
 
     context = {}
 
     return render(request, template, context)
 
 def upload_txns(request):
-    template = 'upload_txns.html'
-
-    # prompt = {
-    #     'order': 'Order of the CSV should be \'district_id\', \district_th\', \'amphur_id\', \'amphur_th\' \
-    #         , \'province_id\', and \'province_th\'.'
-    # }
+    template = 'upload_pages/upload_txns.html'
 
     prompt = {
-        'order': 'Goddamn it.'
+        'order': 'Order of the CSV should be [\'userID\', \'page\', \'event_strength\'] or [\'ID\', \'page\', \'look_tel\', and \'look_information\'].'
     }
 
     if request.method == 'GET':
@@ -190,15 +283,10 @@ def upload_txns(request):
     return render(request, template, context)
 
 def upload_places(request):
-    template = 'upload_places.html'
-
-    # prompt = {
-    #     'order': 'Order of the CSV should be \'district_id\', \district_th\', \'amphur_id\', \'amphur_th\' \
-    #         , \'province_id\', and \'province_th\'.'
-    # }
+    template = 'upload_pages/upload_places.html'
 
     prompt = {
-        'order': 'Goddamn son of a bitch.'
+        'order': 'Order of the CSV should be \'name_th\', \'latitude\', \'longtitude\', \'district_id\', \'amphur_id\', , and \'province_id\'.'
     }
 
     if request.method == 'GET':
@@ -222,6 +310,33 @@ def upload_places(request):
         _, created = Place.objects.update_or_create(name_th = row['name_th'] \
             , latitude = row['latitude'], longitude = row['longitude'], poi_type = row['poi_type'], district = district \
             , amphur = amphur, province = province)
+
+    context = {}
+
+    return render(request, template, context)
+
+def upload_transits(request):
+    template = 'upload_pages/upload_transits.html'
+
+    prompt = {
+        'order': 'Order of the CSV should be \'en\', \'th\', \'latitude\', and \'longitude\'.'
+    }
+
+    if request.method == 'GET':
+        return render(request, template, prompt)
+
+    csv_file = request.FILES['file']
+
+    if not csv_file.name.endswith('.csv'):
+        prompt_2 = {
+            'order': 'This is not the CSV file.'
+        }
+        return render(request, template, prompt_2)
+    
+    df_transits = pd.read_csv(csv_file)
+
+    for index, row in df_transits.iterrows():
+        _, created = Transit.objects.update_or_create(name_th = row['th'], name_en = row['en'], latitude = row['latitude'], longitude = row['longitude'])
 
     context = {}
 
@@ -252,7 +367,23 @@ def recommend_default(request, page_id):
     # return render(request, template, {'page': page , 'df_pages_html': df_pages_html})
     return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
 
-def recommend(request, page_id, setting_name):
+# def recommend(request, page_id, cb_ensemble_weight, cf_ensemble_weight):
+#     template = 'result.html'
+
+#     try:
+#         page = Page.objects.get(pk = page_id)
+#     except Page.DoesNotExist:
+#         return render(request, template, {})
+
+#     df_pages = pd.DataFrame(list(Page.objects.all().values()))
+#     df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
+
+#     cb_model = CBRecommender(df_pages)
+#     cf_model = CFRecommender(df_txns, df_pages)
+
+#     hybrid_model = HybridRecommender(cb_model, cf_model, df_pages, cb_ensemble_weight, cf_ensemble_weight)
+
+def recommend_with_setting(request, page_id, setting_name):
     template = 'result.html'
 
     try:
@@ -289,3 +420,37 @@ def recommend(request, page_id, setting_name):
 
     # return render(request, template, {'page': page , 'df_pages_html': df_pages_html})
     return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
+
+def showSetting(request):
+    settings = Setting.objects.all()
+    return render(request, 'setting_pages/settings.html', {'settings': settings})
+
+def addSetting(request):
+    if request.method == 'POST':
+        form = SettingForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                return redirect('/settings')
+            except:
+                pass
+    else:
+        form = SettingForm()
+    return render(request, 'setting_pages/add_setting.html', {'form': form})
+
+def editSetting(request, id):
+    setting = Setting.objects.get(pk = id)
+    return render(request, 'setting_pages/edit_setting.html', {'setting': setting})
+
+def updateSetting(request, id):
+    setting = Setting.objects.get(pk = id)
+    form = SettingForm(request.POST, instance = setting)
+    if form.is_valid():
+        form.save()
+        return redirect('/settings')
+    return render(request, 'setting_pages/edit_setting.html', {'setting': setting})
+
+def deleteSetting(request, id):
+    setting = Setting.objects.get(pk = id)
+    setting.delete()
+    return redirect('/settings')

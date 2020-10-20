@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center">Recommendation system settings</h1>
+    <a class="btn btn-primary btn-sm" href="/settings/add" role="button">Add a Setting</a><br><br>
+    <div class="card md-8 text-center">
+        <h3 class="text-center">Setting list</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Setting name</th>
+                    <th scope="col">Recommender type</th>
+                    <th scope="col">CB weight</th>
+                    <th scope="col">CF weight</th>
+                    <th scope="col">K</th>
+                    <th scope="col">topn</th>
+                    <th scope="col">n_cb</th>
+                    <th scope="col">n_cf</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for setting in settings %}
+                <tr>
+                    <td>{{ setting.setting_name }}</td>
+                    <td>{{ setting.get_recs_type_display }}</td>
+                    <td>{{ setting.cb_ensemble_weight }}</td>
+                    <td>{{ setting.cf_ensemble_weight }}</td>
+                    <td>{{ setting.k }}</td>
+                    <td>{{ setting.topn }}</td>
+                    <td>{{ setting.n_cb }}</td>
+                    <td>{{ setting.n_cf }}</td>
+                    <td>
+                        <a href="/settings/edit/{{ setting.id }}" class="btn btn-warning btn-sm">Edit</a>   
+                        <a href="/settings/delete/{{ setting.id }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
