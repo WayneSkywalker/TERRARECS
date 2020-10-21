@@ -187,8 +187,8 @@ class Setting(models.Model):
     )
     recs_type = models.PositiveSmallIntegerField(choices = RECS_TYPE_CHOICES, default = 1)
 
-    cb_ensemble_weight = models.PositiveIntegerField(default = 1)
-    cf_ensemble_weight = models.PositiveIntegerField(default = 1)
+    cb_ensemble_weight = models.FloatField(default = 1.0)
+    cf_ensemble_weight = models.FloatField(default = 1.0)
     k = models.PositiveSmallIntegerField(null = True, blank = True)
     topn = models.PositiveSmallIntegerField(null = True, blank = True)
     n_cb = models.PositiveSmallIntegerField(null = True, blank = True)

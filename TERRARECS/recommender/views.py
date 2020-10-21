@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-# from django.contrib.auth.decorators import permission_required
+from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Province, Amphur, District, Page, Transaction, Place, Setting, Transit
 from .forms import SettingForm
 
@@ -9,6 +9,7 @@ from .hybrid_model import HybridRecommender
 
 import pandas as pd
 from math import sin, cos, sqrt, atan2, radians
+import json
 
 def get_distance(x1,y1,x2,y2):
     # approximate radius of the earth in km.
@@ -343,83 +344,258 @@ def upload_transits(request):
     return render(request, template, context)
 
 def recommend_default(request, page_id):
-    template = 'result.html'
+    if request.method == 'GET':
+        # template = 'result.html'
+        response = {
+            'status': '400',
+            'message': '',
+            'data': None
+        }
 
-    try:
-        page = Page.objects.get(pk = page_id)
-    except Page.DoesNotExist:
-        return render(request, template, {})
+        try:
+            page = Page.objects.get(pk = page_id)
+        except Page.DoesNotExist:
+            response['status'] = '404'
+            response['message'] = 'Page with id ' + str(page_id) + ' does not exist.'
+            response['data'] = { 'page_id': page_id }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {})
 
-    df_pages = pd.DataFrame(list(Page.objects.all().values()))
-    df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
+        df_pages = pd.DataFrame(list(Page.objects.all().values()))
+        df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
 
-    cb_model = CBRecommender(df_pages)
-    cf_model = CFRecommender(df_txns, df_pages)
+        cb_model = CBRecommender(df_pages)
+        cf_model = CFRecommender(df_txns, df_pages)
 
-    hybrid_model = HybridRecommender(cb_model, cf_model, df_pages)
+        hybrid_model = HybridRecommender(cb_model, cf_model, df_pages)
 
-    df_recs = hybrid_model.recommend(page_id)
-    # df_recs = hybrid_model.recommend_with_top_3cb(page_id)
-    # df_recs = hybrid_model.recommend_without_weights(page_id)
+        df_recs = hybrid_model.recommend(page_id)
+        df_recs_list = df_recs['page_id'].tolist()
 
-    df_recs_html = df_recs[['page_id','title_th']].to_html()
+        data = {
+            'recommendation_list': df_recs_list
+        }
 
-    # return render(request, template, {'page': page , 'df_pages_html': df_pages_html})
-    return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
+        response['status'] = '200'
+        response['message'] = 'Success'
+        response['data'] = data
 
-# def recommend(request, page_id, cb_ensemble_weight, cf_ensemble_weight):
-#     template = 'result.html'
+        return JsonResponse(response)
 
-#     try:
-#         page = Page.objects.get(pk = page_id)
-#     except Page.DoesNotExist:
-#         return render(request, template, {})
+        # df_recs_html = df_recs[['page_id','title_th']].to_html()
 
-#     df_pages = pd.DataFrame(list(Page.objects.all().values()))
-#     df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
+        # return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
 
-#     cb_model = CBRecommender(df_pages)
-#     cf_model = CFRecommender(df_txns, df_pages)
+def recommend_with_params(request, page_id):
+    if request.method == 'GET':
+        # template = 'result.html'
+        response = {
+            'status': '400',
+            'message': '',
+            'data': None
+        }
 
-#     hybrid_model = HybridRecommender(cb_model, cf_model, df_pages, cb_ensemble_weight, cf_ensemble_weight)
+        try:
+            page = Page.objects.get(pk = page_id)
+        except Page.DoesNotExist:
+            response['status'] = '404'
+            response['message'] = 'Page with id ' + str(page_id) + ' does not exist.'
+            response['data'] = { 'page_id': page_id }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {})
+
+        # error handlers
+        try:
+            recs_type = int(request.GET['recs_type'])
+        except ValueError:
+            response['message'] = 'Recommendation type value is not valid.'
+            response['data'] = { 'recs_type': request.GET['recs_type'] }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid recs_type'})
+        if recs_type not in list(range(1,4)): # 1, 2, 3
+            response['message'] = 'Recommendation type does not exist.'
+            response['data'] = { 'recs_type': recs_type }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid recs_type'})
+
+        try:
+            cb_ensemble_weight = float(request.GET['cb_ensemble_weight'])
+        except ValueError:
+            if request.GET['cb_ensemble_weight'] == "":
+                cb_ensemble_weight = 1.0
+            else:
+                response['message'] = 'CB weight value is not valid.'
+                response['data'] = { 'cb_ensemble_weight': request.GET['cb_ensemble_weight'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid cb_ensemble_weight'})
+
+        try:
+            cf_ensemble_weight = float(request.GET['cf_ensemble_weight'])
+        except ValueError:
+            if request.GET['cf_ensemble_weight'] == "":
+                cf_ensemble_weight = 1.0
+            else:
+                response['message'] = 'CF weight value is not valid.'
+                response['data'] = { 'cf_ensemble_weight': request.GET['cf_ensemble_weight'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid cf_ensemble_weight'})
+
+        try:
+            k = int(request.GET['k'])
+        except ValueError:
+            if request.GET['k'] == "":
+                k = 10
+            else:
+                response['message'] = 'K value is not valid.'
+                response['data'] = { 'k': request.GET['k'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid k'})
+        if k <= 0:
+            response['message'] = 'K value must be a positive integer and not zero.'
+            response['data'] = { 'k': int(request.GET['k']) }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+
+        try:
+            topn = int(request.GET['topn'])
+        except ValueError:
+            if request.GET['topn'] == "":
+                topn = None
+            else:
+                response['message'] = 'topn value is not valid.'
+                response['data'] = { 'topn': request.GET['topn'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid topn'})
+        if topn:
+            if topn <= 0:
+                response['message'] = 'topn value must be a positive integer and not zero.'
+                response['data'] = { 'topn': int(request.GET['topn']) }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+
+        try:
+            n_cb = int(request.GET['n_cb'])
+        except ValueError:
+            if request.GET['n_cb'] == "":
+                n_cb = None
+            else:
+                response['message'] = 'n_cb value is not valid.'
+                response['data'] = { 'n_cb': request.GET['n_cb'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid n_cb'})
+        if n_cb:
+            if n_cb <= 0:
+                response['message'] = 'n_cb value must be a positive integer and not zero.'
+                response['data'] = { 'n_cb': int(request.GET['n_cb']) }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+        
+        try:
+            n_cf = int(request.GET['n_cf'])
+        except ValueError:
+            if request.GET['n_cf'] == "":
+                n_cf = None
+            else:
+                response['message'] = 'n_cf value is not valid.'
+                response['data'] = { 'n_cf': request.GET['n_cf'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {'error': 'invalid n_cf'})
+        if n_cf:
+            if n_cf <= 0:
+                response['message'] = 'n_cf value must be a positive integer and not zero.'
+                response['data'] = { 'n_cf': int(request.GET['n_cf']) }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+
+        df_pages = pd.DataFrame(list(Page.objects.all().values()))
+        df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
+
+        cb_model = CBRecommender(df_pages)
+        cf_model = CFRecommender(df_txns, df_pages)
+
+        hybrid_model = HybridRecommender(cb_model, cf_model, df_pages, cb_ensemble_weight, cf_ensemble_weight)
+
+        if recs_type == 1:
+            df_recs = hybrid_model.recommend(page_id, k, topn)
+        elif recs_type == 2:
+            df_recs = hybrid_model.recommend_with_top_3cb(page_id, k, topn)
+        else:
+            df_recs = hybrid_model.recommend_without_weights(page_id, k, n_cb, n_cf, topn)
+        
+        df_recs_list = df_recs['page_id'].tolist()
+
+        data = {
+            'recommendation_list': df_recs_list
+        }
+
+        response['status'] = '200'
+        response['message'] = 'Success'
+        response['data'] = data
+
+        return JsonResponse(response)
+
+        # df_recs_html = df_recs[['page_id','title_th']].to_html()
+
+        # return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
 
 def recommend_with_setting(request, page_id, setting_name):
-    template = 'result.html'
+    if request.method == 'GET':
+        # template = 'result.html'
+        response = {
+            'status': '400',
+            'message': '',
+            'data': None
+        }
 
-    try:
-        page = Page.objects.get(pk = page_id)
-    except Page.DoesNotExist:
-        return render(request, template, {})
+        try:
+            page = Page.objects.get(pk = page_id)
+        except Page.DoesNotExist:
+            response['status'] = '404'
+            response['message'] = 'Page with id ' + str(page_id) + ' does not exist.'
+            response['data'] = { 'page_id': page_id }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {})
 
-    try:
-        setting = Setting.objects.get(setting_name = setting_name)
-    except Setting.DoesNotExist:
-        return render(request, template, {})
+        try:
+            setting = Setting.objects.get(setting_name = setting_name)
+        except Setting.DoesNotExist:
+            response['status'] = '404'
+            response['message'] = 'Setting name \'' + setting_name + '\' does not exist.'
+            response['data'] = { 'setting_name': setting_name }
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            # return render(request, template, {})
 
-    df_pages = pd.DataFrame(list(Page.objects.all().values()))
-    df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
+        df_pages = pd.DataFrame(list(Page.objects.all().values()))
+        df_txns = pd.DataFrame(list(Transaction.objects.all().values()))
 
-    cb_model = CBRecommender(df_pages)
-    cf_model = CFRecommender(df_txns, df_pages)
+        cb_model = CBRecommender(df_pages)
+        cf_model = CFRecommender(df_txns, df_pages)
 
-    hybrid_model = HybridRecommender(cb_model, cf_model, df_pages, setting.cb_ensemble_weight, setting.cf_ensemble_weight)
+        hybrid_model = HybridRecommender(cb_model, cf_model, df_pages, setting.cb_ensemble_weight, setting.cf_ensemble_weight)
 
-    if setting.k is None or setting.k == 0:
-        k = 10
-    else:
-        k = setting.k
+        if setting.k is None or setting.k == 0:
+            k = 10
+        else:
+            k = setting.k
 
-    if setting.recs_type == 1:
-        df_recs = hybrid_model.recommend(page_id, k, setting.topn)
-    elif setting.recs_type == 2:
-        df_recs = hybrid_model.recommend_with_top_3cb(page_id, k, setting.topn)
-    else:
-        df_recs = hybrid_model.recommend_without_weights(page_id, k, setting.n_cb, setting.n_cf, setting.topn)
+        if setting.recs_type == 1:
+            df_recs = hybrid_model.recommend(page_id, k, setting.topn)
+        elif setting.recs_type == 2:
+            df_recs = hybrid_model.recommend_with_top_3cb(page_id, k, setting.topn)
+        else:
+            df_recs = hybrid_model.recommend_without_weights(page_id, k, setting.n_cb, setting.n_cf, setting.topn)
 
-    df_recs_html = df_recs[['page_id','title_th']].to_html()
+        df_recs_list = df_recs['page_id'].tolist()
 
-    # return render(request, template, {'page': page , 'df_pages_html': df_pages_html})
-    return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
+        data = {
+            'recommendation_list': df_recs_list
+        }
+
+        response['status'] = '200'
+        response['message'] = 'Success'
+        response['data'] = data
+
+        return JsonResponse(response)
+
+        # df_recs_html = df_recs[['page_id','title_th']].to_html()
+
+        # return render(request, template, {'page': page , 'df_recs_html': df_recs_html})
 
 def showSetting(request):
     settings = Setting.objects.all()

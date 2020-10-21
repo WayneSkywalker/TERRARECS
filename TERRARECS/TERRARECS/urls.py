@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from recommender.views import index, detail, recommend_default, recommend_with_setting
+from recommender.views import index, detail, recommend_default, recommend_with_params, recommend_with_setting
 from recommender.views import showSetting, addSetting, editSetting, updateSetting, deleteSetting
 from recommender.views import upload_address, upload_pages, upload_txns, upload_places, upload_transits
 
@@ -23,8 +23,8 @@ urlpatterns = [
     path('', index, name = 'index'),
     path('admin/', admin.site.urls),
     path('<int:page_id>', detail, name = 'detail'),
+    path('recommend/<int:page_id>', recommend_with_params, name = 'recommend_with_params'),
     path('recommend_default/<int:page_id>', recommend_default, name = 'recommend_default'),
-    # path('recommend/<int:page_id>/<str:setting_name>', recommend, name = 'recommend'),
     path('recommend_with_setting/<int:page_id>/<str:setting_name>', recommend_with_setting, name = 'recommend_with_setting'),
     path('settings', showSetting, name = 'showSetting'),
     path('settings/add', addSetting, name = 'addSetting'),
