@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center recs-head">Upload address data</h1>
+    <p>{{order}}</p>
+    <div class="card mb-3 rscard">
+        <div class="container">
+            <div class="card-body">
+                <form action="/upload_data/address" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="container">
+                        <input type="file" name="file">
+                        <p>Only accepts CSV files</p>
+                        <button class="btn btn-upload" type="submit">Upload</button>
+                        <a class="btn btn-back" href="/upload_data" role="button">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

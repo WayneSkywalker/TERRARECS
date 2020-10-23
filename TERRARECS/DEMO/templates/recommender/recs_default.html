@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center recs-head">Default Recommender</h1>
+    <div class="card rscard">
+        <div class="card-body">
+            <p>{{order}}</p>
+            <form method="GET" action="/recommender/default/recommend">
+                <div class="form-group">
+                    <label>Page ID</label>
+                    <input type="text" name = "page_id" class="form-control">
+                </div>
+                <button class="btn btn-recommend" type="submit">Recommend</button>
+                <a class="btn btn-back" href="/recommender" role="button">Back</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

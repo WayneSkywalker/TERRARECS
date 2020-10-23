@@ -1,0 +1,128 @@
+@font-face {
+    font-family: 'NexaTextDemo-Light';
+    src: url('NexaTextDemo-Light.woff2') format('woff2'),
+         url('NexaTextDemo-Light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NexaTextDemo-Bold';
+    src: url('NexaTextDemo-Bold.woff2') format('woff2'),
+         url('NexaTextDemo-Bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'anakotmai-light';
+    src: url('anakotmai-light.woff2') format('woff2'),
+         url('anakotmai-light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'NexaTextDemo-Light', 'NexaTextDemo-Bold', 'anakotmai-light';
+}
+
+.main {
+    height: 100%;
+    position: relative;
+}
+
+.main .jumbotron {
+    color: #FFFFFF;
+    background-color: #B13624;
+    top: 50%;
+    transform: translate(0%, 50%)
+}
+
+.main .jumbotron h1 {
+    font-family: 'NexaTextDemo-Bold'
+}
+
+.main .jumbotron .my-4 {
+    background-color: #FFFFFF;
+}
+
+.btn-recommend, .btn-upload-data, .btn-setting{
+    background-color: #76292A;
+    color: #FFFFFF;
+}
+
+.rscard, .rscard input[type=text], .rscard select{
+    border: 1px solid #76292A;
+    color: #76292A;
+}
+
+.rscard-dark {
+    background-color: #76292A;
+    color: #FFFFFF;
+}
+
+.btn-back {
+    background-color: #6C757D;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+.btn-back:hover {
+    background-color: #FFFFFF;
+    color: #6C757D;
+    border: 1px solid #6C757D;
+}
+
+.btn-recommend:hover, .btn-upload-data:hover, .btn-setting:hover{
+    background-color: #FFFFFF;
+    color: #76292A;
+    border: 1px solid #76292A;
+}
+
+.btn-upload {
+    background-color: #BA6E69;
+    color: #FFFFFF;
+}
+
+.btn-upload:hover {
+    background-color: #FFFFFF;
+    color: #BA6E69;
+    border: 1px solid #BA6E69;
+}
+
+.btn-setting {
+    background-color: #8C0F13;
+    color: #FFFFFF;
+}
+
+.btn-setting:hover {
+    background-color: #FFFFFF;
+    color:  #8C0F13;
+    border: 1px solid #8C0F13;
+}
+
+.btn-edit-setting {
+    background-color:#F1C3BE;
+    color: #FFFFFF;
+}
+
+.btn-edit-setting:hover {
+    background-color: #FFFFFF;
+    color: #8C0F13;
+    border: 1px solid #8C0F13;
+}
+
+.btn-danger:hover {
+    background-color: #FFFFFF;
+    color:  #DC3545;
+    border: 1px solid #DC3545;
+}
+
+.recs-head {
+    font-family: 'NexaTextDemo-Bold';
+    color: #76292A;
+}
+
+table {
+    color: #8C0F13;
+}

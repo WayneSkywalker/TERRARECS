@@ -3,7 +3,6 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFou
 from django.core import serializers
 from django.db import IntegrityError
 from .models import Province, Amphur, District, Page, Transaction, Place, Setting, Transit
-from .forms import SettingForm
 
 from .cb_model import CBRecommender
 from .cf_model import CFRecommender
@@ -32,8 +31,6 @@ def get_distance(x1,y1,x2,y2):
     return distance
 
 ###### APIs begin here. ######
-def index(request):
-    return render(request, 'index.html')
 
 #### CSV Upload APIs ####
 def upload_address(request):

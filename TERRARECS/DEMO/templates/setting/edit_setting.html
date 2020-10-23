@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card rscard">
+    <form method="POST" action="/setting/update/{{ setting.id }}">
+        {% csrf_token %}
+        <div class="container">
+            <h1 class="text-center recs-head">Edit recommender setting</h1>
+            <div class="form-group">
+                <label>Setting Name</label>
+                <input type="text" name = "setting_name" class="form-control" value = "{{ setting.setting_name }}">
+            </div>
+            <div class="form-group">
+                <label>Recommender type</label>
+                <select class="form-control" name = "recs_type">
+                    <option value="1">NORMAL RECOMMENDER</option>
+                    <option value="2">RECOMMENDER WITH TOP 3 CONTENT - BASED</option>
+                    <option value="3">RECOMMENDER WITHOUT WEIGHTS</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>CB weight</label>
+                <input type="text" name = "cb_ensemble_weight" class="form-control" value = "{{ setting.cb_ensemble_weight }}">
+            </div>
+            <div class="form-group">
+                <label>CF weight</label>
+                <input type="text" name = "cf_ensemble_weight" class="form-control" value = "{{ setting.cf_ensemble_weight }}">
+            </div>
+            <div class="form-group">
+                <label>K</label>
+                <input type="text" name = "k" class="form-control" value = "{{ setting.k }}">
+            </div>
+            <div class="form-group">
+                <label>topn</label>
+                <input type="text" name = "topn" class="form-control" value = "{{ setting.topn }}">
+            </div>
+            <div class="form-group">
+                <label>n_cb</label>
+                <input type="text" name = "n_cb" class="form-control" value = "{{ setting.n_cb }}">
+            </div>
+            <div class="form-group">
+                <label>n_cf</label>
+                <input type="text" name = "n_cf" class="form-control" value = "{{ setting.n_cf }}">
+            </div>
+            <button class="btn btn-edit-setting" type="submit">Update</button>
+            <a class="btn btn-back" href="/setting" role="button">Back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

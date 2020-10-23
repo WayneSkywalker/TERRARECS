@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center recs-head">Recommendation for {{page.page_id}}</h1>
+    <div class="card rscard-dark">
+        <div class="card-body">
+            <h4 class="text-center">{{page.title_th}}</h4>
+        </div>
+    </div>
+    <br>
+    <table class="table">
+        <thead>
+            <tr class="text-center">
+                {% for column in recommendations.columns %}
+                <th scope="col">{{column}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recommendations.data %}
+            <tr>
+                {% for data in row %}
+                <td>{{data}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="card">
+        <div class="card-body text-center">
+            <a class="btn btn-back" href="/recommender" role="button">Back to recommender</a>
+        </div>
+    </div>
+{% endblock %}

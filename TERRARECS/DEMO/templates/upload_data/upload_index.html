@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center recs-head">Upload data</h1>
+    <p class="text-center">Upload datasets to prepare data for the recommendation system using the csv file.</p>
+    <div class="card rscard">
+        <div class="card-body text-center">
+            <a class="btn btn-upload" href="property_posts" role="button">Property posts</a>
+            <a class="btn btn-upload" href="txns" role="button">Transactions</a>
+            <a class="btn btn-upload" href="address" role="button">Address</a>
+            <a class="btn btn-upload" href="places" role="button">Places</a>
+            <a class="btn btn-upload" href="transits" role="button">Transits</a>
+            <a class="btn btn-back" href="/" role="button">Back to main</a>
+        </div>
+    </div>
+{% endblock %}

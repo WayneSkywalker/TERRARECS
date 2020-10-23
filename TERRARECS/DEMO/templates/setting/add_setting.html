@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card rscard">
+    <div class="card-body">
+        <div class="container">
+            <form method="POST" action="/setting/add/">
+                {% csrf_token %}
+                <div class="container">
+                    <h1 class="text-center mb-3 recs-head">Add a setting</h1>
+                    <div class="form-group">
+                        <label>Setting Name</label>
+                        <div class="col">
+                            {{ form.setting_name }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Recommender type</label>
+                        <div class="col">
+                            {{ form.recs_type }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CB weight</label>
+                        <div class="col">
+                            {{ form.cb_ensemble_weight }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CF weight</label>
+                        <div class="col">
+                            {{ form.cf_ensemble_weight }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>K</label>
+                        <div class="col">
+                            {{ form.k }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>topn</label>
+                        <div class="col">
+                            {{ form.topn }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>n_cb</label>
+                        <div class="col">
+                            {{ form.n_cb }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>n_cf</label>
+                        <div class="col">
+                            {{ form.n_cf }}
+                        </div>
+                    </div>
+                    <button class="btn btn-setting" type="submit">Add</button>
+                    <a class="btn btn-back" href="/setting" role="button">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

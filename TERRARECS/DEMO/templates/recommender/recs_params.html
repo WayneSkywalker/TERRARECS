@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="card col-md-6 m-auto">
-        <h1 class="text-center mb-3">Edit {{ setting.setting_name }}</h1>
-        <div class="container">
-            <form method="POST" action="/settings/update/{{ setting.id }}">
-                {% csrf_token %}
+    <h1 class="text-center recs-head">Recommender with parameters</h1>
+    <div class="card rscard">
+        <div class="card-body">
+            <p>{{order}}</p>
+            <form method="GET" action="/recommender/params/recommend">
                 <div class="form-group">
-                    <label>Setting Name</label>
-                    <input type="text" name = "setting_name" class="form-control" value = "{{ setting.setting_name }}">
+                    <label>Page ID</label>
+                    <input type="text" name = "page_id" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Recommender type</label>
@@ -20,31 +20,31 @@
                 </div>
                 <div class="form-group">
                     <label>CB weight</label>
-                    <input type="text" name = "cb_ensemble_weight" class="form-control" value = "{{ setting.cb_ensemble_weight }}">
+                    <input type="text" name = "cb_ensemble_weight" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>CF weight</label>
-                    <input type="text" name = "cf_ensemble_weight" class="form-control" value = "{{ setting.cf_ensemble_weight }}">
+                    <input type="text" name = "cf_ensemble_weight" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>K</label>
-                    <input type="text" name = "k" class="form-control" value = "{{ setting.k }}">
+                    <input type="text" name = "k" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>topn</label>
-                    <input type="text" name = "topn" class="form-control" value = "{{ setting.topn }}">
+                    <input type="text" name = "topn" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>n_cb</label>
-                    <input type="text" name = "n_cb" class="form-control" value = "{{ setting.n_cb }}">
+                    <input type="text" name = "n_cb" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>n_cf</label>
-                    <input type="text" name = "n_cf" class="form-control" value = "{{ setting.n_cf }}">
+                    <input type="text" name = "n_cf" class="form-control">
                 </div>
-                <button class="btn btn-primary" type="submit">Update</button>
+                <button class="btn btn-recommend" type="submit">Recommend</button>
+                <a class="btn btn-back" href="/recommender" role="button">Back</a>
             </form>
         </div>
     </div>
-
 {% endblock %}
