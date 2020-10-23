@@ -23,7 +23,8 @@ pipenv shell
 pip install -r requirements.txt
 ```
 ## Usage
-### first time usage 
+### Local server 
+#### First time usage
 1. Open your python environment that was created at your root project location.
 ```bash
 pipenv shell
@@ -57,7 +58,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 This will be run on http://localhost:8000.
-### Non-first time usage
+#### Non-first time usage
 1. Open your python environment that was created at your root project location.
 ```bash
 pipenv shell
@@ -77,4 +78,16 @@ In settings.py (which is in TERRARECS/TERRARECS), please..
 DEBUG = False
 ``` 
 and set the database before runserver.
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'terrarecs',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+}
+```
 ## Lisence
