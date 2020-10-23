@@ -1,7 +1,7 @@
 from django.db import models
 
 class Province(models.Model):
-    province_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
+    province_id = models.PositiveIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30, unique = True)
     en = models.CharField(max_length = 30, blank = True)
 
@@ -12,7 +12,7 @@ class Province(models.Model):
         return self.th
 
 class Amphur(models.Model):
-    amphur_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
+    amphur_id = models.PositiveIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30)
     en = models.CharField(max_length = 30, blank = True)
 
@@ -25,7 +25,7 @@ class Amphur(models.Model):
         return self.th
 
 class District(models.Model):
-    district_id = models.PositiveSmallIntegerField(primary_key = True, unique = True)
+    district_id = models.PositiveIntegerField(primary_key = True, unique = True)
     th = models.CharField(max_length = 30)
     en = models.CharField(max_length = 30, blank = True)
 
