@@ -20,13 +20,14 @@
                 <th scope="col">n_cb</th>
                 <th scope="col">n_cf</th>
                 <th scope="col"></th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
             {% for setting in settings %}
             <tr>
                 <td>{{ setting.setting_name }}</td>
-                <td class="text-center">{{ setting.recs_type }}</td>
+                <td class="text-center">{{ setting.get_recs_type_display }}</td>
                 <td class="text-center">{{ setting.cb_ensemble_weight }}</td>
                 <td class="text-center">{{ setting.cf_ensemble_weight }}</td>
                 <td class="text-center">{{ setting.k }}</td>
@@ -35,6 +36,8 @@
                 <td class="text-center">{{ setting.n_cf }}</td>
                 <td class="text-center">
                     <a href="edit/{{ setting.id }}" class="btn btn-edit-setting" role="button">Edit</a>
+                </td>
+                <td class="text-center">
                     <a href="delete/{{ setting.id }}" class="btn btn-danger" role="button">Delete</a>
                 </td>
             </tr>

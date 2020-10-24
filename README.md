@@ -22,6 +22,7 @@ pipenv shell
 ```bash
 pip install -r requirements.txt
 ```
+5. Install MySQL
 ## Usage
 ### Local server 
 #### First time usage
@@ -53,7 +54,12 @@ you will see...
 python manage.py makemigrations
 python manage.py migrate
 ```
-5. To run server, run this command...
+WARNING: Make sure your MySQL database exists in your environment.
+5. Create an admin account using command
+```bash
+python manage.py createsuperuser
+```
+6. To run server, run this command...
 ```bash
 python manage.py runserver
 ```

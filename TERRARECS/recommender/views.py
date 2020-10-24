@@ -185,9 +185,39 @@ def upload_pages(request):
         del distances_list, flag_distances, flag_supermarket, flag_department_store, flag_education, flag_transit
 
         for index, row in df_pages.iterrows():
-            district = District.objects.get(district_id = row['district_id'])
-            amphur = Amphur.objects.get(amphur_id = row['amphur_id'])
-            province = Province.objects.get(province_id = row['province_id'])
+            try:
+                district = District.objects.get(district_id = row['district_id'])
+            except Province.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'Province with id \'' + str(row['district_id']) + '\' does not exist.'
+                response['data'] = { 'page_id': row['id'],'province_id': row['district_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'province_id value is not valid.'
+                response['data'] = { 'page_id': row['id'], 'province_id': row['district_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            try:
+                amphur = Amphur.objects.get(amphur_id = row['amphur_id'])
+            except Amphur.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'amphur with id \'' + str(row['amphur_id']) + '\' does not exist.'
+                response['data'] = { 'page_id': row['id'], 'amphur_id': row['amphur_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'amphur_id value is not valid.'
+                response['data'] = { 'page_id': row['id'], 'amphur_id': row['amphur_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            try:
+                province = Province.objects.get(province_id = row['province_id'])
+            except District.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'district with id \'' + str(row['province_id']) + '\' does not exist.'
+                response['data'] = { 'page_id': row['id'], 'district_id': row['province_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'district_id value is not valid.'
+                response['data'] = { 'page_id': row['id'], 'district_id': row['province_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
 
             _, created = Page.objects.update_or_create(page_id = row['id'], title_th = row['title_th'], title_en = row['title_en'] \
                 , lat = row['lat'], lng = row['lng'], rent_price = row['rent_price'], sale_price = row['sell_price'], area_id = row['area_id']\
@@ -316,9 +346,39 @@ def upload_places(request):
             return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
 
         for index, row in df_places.iterrows():
-            district = District.objects.get(district_id = row['district_id'])
-            amphur = Amphur.objects.get(amphur_id = row['amphur_id'])
-            province = Province.objects.get(province_id = row['province_id'])
+            try:
+                district = District.objects.get(district_id = row['district_id'])
+            except Province.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'Province with id \'' + str(row['district_id']) + '\' does not exist.'
+                response['data'] = {'province_id': row['district_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'province_id value is not valid.'
+                response['data'] = { 'province_id': row['district_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            try:
+                amphur = Amphur.objects.get(amphur_id = row['amphur_id'])
+            except Amphur.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'amphur with id \'' + str(row['amphur_id']) + '\' does not exist.'
+                response['data'] = { 'amphur_id': row['amphur_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'amphur_id value is not valid.'
+                response['data'] = { 'amphur_id': row['amphur_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+            try:
+                province = Province.objects.get(province_id = row['province_id'])
+            except District.DoesNotExist:
+                response['status'] = '404'
+                response['message'] = 'district with id \'' + str(row['province_id']) + '\' does not exist.'
+                response['data'] = { 'district_id': row['province_id'] }
+                return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
+            except ValueError:
+                response['message'] = 'district_id value is not valid.'
+                response['data'] = { 'district_id': row['province_id'] }
+                return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
 
             _, created = Place.objects.update_or_create(name_th = row['name_th'] \
                 , latitude = row['latitude'], longitude = row['longitude'], poi_type = row['poi_type'], district = district \
@@ -2164,6 +2224,10 @@ def updateSetting(request, id):
             return HttpResponseNotFound(json.dumps(response), content_type = 'application/json')
         except KeyError as e:
             response['message'] = str(e) + ' is required.'
+            response['data'] = data
+            return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
+        except IntegrityError:
+            response['message'] = 'This setting is already exists.'
             response['data'] = data
             return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
     else:

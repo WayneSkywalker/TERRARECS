@@ -39,7 +39,7 @@ class HybridRecommender:
         del df_hybrid_recs_list, df_hybrid_recs_score_list
 
         if topn is not None:
-            df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True).head(k)
+            df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True).head(topn)
         else:
             df_recommendation = df_recommendation.sort_values('score', ascending = False).reset_index(drop = True)
         
@@ -73,7 +73,7 @@ class HybridRecommender:
         del df_hybrid_recs_list, df_hybrid_recs_score_list
         
         if topn is not None:
-            df_recommendation = df_recommendation.append(temp, ignore_index = True).head(k)
+            df_recommendation = df_recommendation.append(temp, ignore_index = True).head(topn)
         else:
             df_recommendation = df_recommendation.append(temp, ignore_index = True)
 
