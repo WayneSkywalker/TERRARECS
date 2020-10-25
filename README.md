@@ -96,4 +96,5 @@ DATABASES = {
     }
 }
 ```
+WARNING: For first-time uploading csv files features, you need to upload files in order: address >> pages >> places >> transits >> transaactions.
 ## Lisence

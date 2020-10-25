@@ -336,12 +336,12 @@ def upload_places(request):
             return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
 
         df_places = pd.read_csv(csv_file)
-        df_places_columns = ['name_th', 'latitude', 'longtitude', 'district_id', 'amphur_id', 'province_id']
+        df_places_columns = ['name_th', 'latitude', 'longtitude', 'poi_type', 'district_id', 'amphur_id', 'province_id']
         check = all(column in df_places.columns.tolist() for column in df_places_columns)
 
         if not check:
             response['status'] = '400'
-            response['message'] = 'Columns of the CSV should contain \'name_th\', \'latitude\', \'longtitude\', \'district_id\', \'amphur_id\', , and \'province_id\'.'
+            response['message'] = 'Columns of the CSV should contain \'name_th\', \'latitude\', \'longtitude\', \'poi_type\', \'district_id\', \'amphur_id\', , and \'province_id\'.'
             response['data'] = df_places.columns.tolist()
             return HttpResponseBadRequest(json.dumps(response), content_type = 'application/json')
 
